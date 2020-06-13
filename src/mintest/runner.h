@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
                         printf("%s: [PASS]\n", all_tests[i].name);
                         normal();
                     }
+                    break;
                 }
               
             }
