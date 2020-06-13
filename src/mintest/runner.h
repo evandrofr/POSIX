@@ -54,16 +54,34 @@ int main(int argc, char *argv[]) {
         printf("\n\n=================================\n");
         printf("%d/%d tests passed\n", pass_count, size);
     } else if(argc == 2) {
-
+        pid_t f;
         printf("Rodando o teste %s\n", argv[1]);
         int size = sizeof(all_tests)/sizeof(test_data);
         for (int i = 0; i < size; i++) {
             if(strcmp(all_tests[i].name,argv[1]) == 0){
-                if(all_tests[i].function() >= 0){
-                    printf("%s: [PASS]\n", all_tests[i].name);
+                f = fork();
+                if(f == 0){
+                    if(all_tests[i].function() >= 0){
+                        verde();
+                        printf("%s: [PASS]\n", all_tests[i].name);
+                        normal();
+                    }
                 }
+              
             }
         }
+        if(f == 0){
+            return 0;
+        }
+        int st;
+        wait(&st);
+        if (WIFSIGNALED(st)){
+            vermelho_bold();
+            printf("%s: [ERROR] %s\n",argv[1], strsignal(WTERMSIG(st)));
+            normal();
+        }
+        
+ 
     }
 
     return 0;
