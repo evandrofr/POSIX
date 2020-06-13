@@ -15,15 +15,17 @@ int main(int argc, char *argv[]) {
 
         int size = sizeof(all_tests)/sizeof(test_data);
         printf("Running %d tests:\n", size);
-        printf("=====================\n\n");
+        printf("=========================================\n\n");
         
         for (int i = 0; i < size; i++) {
             filho = fork();
             if(filho == 0){
-                printf("------------------>Filho: %d Pai: %d Name: %s\n", getpid(), getppid(), all_tests[i].name);
+                //printf("------------------>Filho: %d Pai: %d Name: %s\n", getpid(), getppid(), all_tests[i].name);
                 if (all_tests[i].function() >= 0) {
                     ret_filho = 1;
+                    verde();
                     printf("%s: [PASS]\n", all_tests[i].name);
+                    normal();
                 };
                 break;
             }
@@ -36,8 +38,14 @@ int main(int argc, char *argv[]) {
         int w;
         // wait(&w);
         while ((waitpid = wait(&w)) > 0){
-            printf("Ret_filho = %d\n", WEXITSTATUS(w));
-            pass_count += WEXITSTATUS(w);
+            int id = waitpid - getpid();
+            if (WIFEXITED(w)) pass_count += WEXITSTATUS(w);
+            if (WIFSIGNALED(w)){
+                vermelho_bold();
+                printf("test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
+                normal();
+            } 
+           
         }
 
 
