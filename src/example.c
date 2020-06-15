@@ -67,7 +67,7 @@ int test7() {
 
 int test8() {
     alarm(2);
-    for(int i = 0; i < 100; i++){
+    for(int i = 1; i <= 100; i++){
         test_printf("Print %d de 100\n", i);
     }
     return 0;

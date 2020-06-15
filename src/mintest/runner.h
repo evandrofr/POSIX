@@ -24,17 +24,22 @@ int main(int argc, char *argv[]) {
             if(filho == 0){
                 char arq[100];
                 sprintf(arq, "%s.txt",all_tests[i].name );
-                char buffer[100];
+                char buffer[64];
                 int file = open(arq, O_WRONLY | O_CREAT, 0700);
                 //printf("------------------>Filho: %d Pai: %d Name: %s\n", getpid(), getppid(), all_tests[i].name);
                 if (all_tests[i].function() >= 0) {
                     ret_filho = 1;
                     //printf("-------> sizeof %d <--------", sizeof("blabla")/sizeof(char) - 1);
-                    write(file, "\033[0;32m", sizeof("\033[0;32m")/sizeof(char) - 1);
-                    sprintf(buffer, "%s: [PASS]\n", all_tests[i].name);
-                    write(file, buffer, sizeof(buffer)/sizeof(char)-1);
-                    write(file, "\033[0m",sizeof("\033[0m")/sizeof(char) - 1 );
-                    write(file, "\0",sizeof("\0")/sizeof(char));
+                    //write(file, "\033[0;32m", sizeof("\033[0;32m")/sizeof(char)); // verde
+                    sprintf(buffer, "\n%s: [PASS]\n", all_tests[i].name);
+                    int cont = 0;
+                    while(buffer[cont] != '\0'){
+                        cont++;
+                    }
+                    write(file, buffer, cont); //
+                    //write(file, "\033[0m",sizeof("\033[0m")/sizeof(char));// Normal
+
+
                     // verde();
                     // printf("%s: [PASS]\n", all_tests[i].name);
                     // normal();
@@ -56,15 +61,20 @@ int main(int argc, char *argv[]) {
             if (WIFSIGNALED(w)){
                 char arq[100];
                 sprintf(arq, "%s.txt",all_tests[id].name );
-                char buffer[100];
+                char buffer[64];
                 int file = open(arq, O_WRONLY | O_CREAT, 0700);
 
-                write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char) - 1);
-                sprintf(buffer, "test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
-                write(file, buffer, sizeof(buffer)/sizeof(char)-1);
-                write(file, "\033[0m",sizeof("\033[0m")/sizeof(char) - 1 );
-                write(file, "\0",sizeof("\0")/sizeof(char));
+                //write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
+                sprintf(buffer, "\ntest%d: [ERROR] %s\n",id,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
+                int cont = 0;
+                while(buffer[cont] != '\0'){
+                    cont++;
+                }
+                write(file, buffer, cont); // 
+                //write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
                 close(file);
+
+
                 // vermelho_bold();
                 // printf("test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
                 // normal();
@@ -81,7 +91,7 @@ int main(int argc, char *argv[]) {
             int fileread = open(arq, O_RDONLY);
             int bytes_read = read(fileread, buf, 1);
             printf("%c", buf[0]);
-             while(bytes_read > 0) {
+             while(bytes_read != '\0') {
                  bytes_read = read(fileread, buf, 1);
                  printf("%c", buf[0]);
              }
