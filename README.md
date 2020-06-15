@@ -1,5 +1,6 @@
 # POSIX
 COMO UTILIZAR:
+
 -Compile o projeto com o comando: gcc example.c -o example
 -Você pode executar o programa de dois modos:
 --Executar todos os testes -> Rode o executavel sem nenhum argumento. Dentro da pasta src use o comando: ./example
