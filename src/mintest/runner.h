@@ -1,6 +1,7 @@
 #include <string.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -14,19 +15,35 @@ int main(int argc, char *argv[]) {
         pid_t filho, waitpid;
 
         int size = sizeof(all_tests)/sizeof(test_data);
+
         printf("Running %d tests:\n", size);
         printf("=========================================\n\n");
         
         for (int i = 0; i < size; i++) {
             filho = fork();
             if(filho == 0){
-                //printf("------------------>Filho: %d Pai: %d Name: %s\n", getpid(), getppid(), all_tests[i].name);
+                char arq[100];
+                sprintf(arq, "%s.txt",all_tests[i].name );
+                //char buffer[64];
+                int file = open(arq, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+                dup2(file,STDOUT_FILENO);
                 if (all_tests[i].function() >= 0) {
                     ret_filho = 1;
-                    verde();
-                    printf("%s: [PASS]\n", all_tests[i].name);
-                    normal();
+                    //write(file, "\033[0;32m", sizeof("\033[0;32m")/sizeof(char)); // verde
+                    // sprintf(buffer, "%s: [PASS]\n", all_tests[i].name);
+                    // int cont = 0;
+                    // while(buffer[cont] != '\0'){
+                    //     cont++;
+                    // }
+                    // write(file, buffer, cont); //
+                    // write(file, "\033[0m",sizeof("\033[0m")/sizeof(char));// Normal
+
+
+                   verde();
+                   printf("%s: [PASS]\n", all_tests[i].name);
+                   normal();
                 };
+                close(file);
                 break;
             }
             
@@ -38,18 +55,65 @@ int main(int argc, char *argv[]) {
         int w;
         // wait(&w);
         while ((waitpid = wait(&w)) > 0){
-            int id = waitpid - getpid();
+            int id = waitpid - getpid() - 1;
+            int wr;
             if (WIFEXITED(w)) pass_count += WEXITSTATUS(w);
             if (WIFSIGNALED(w)){
-                vermelho_bold();
-                printf("test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
-                normal();
+                char arq[100];
+                sprintf(arq, "%s.txt",all_tests[id].name );
+                char buffer[64];
+                int file = open(arq, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+                if(WTERMSIG(w) == 14){
+                     wr = write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
+                    sprintf(buffer, "%s: [TIME] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
+                    int cont = 0;
+                    while(buffer[cont] != '\0'){
+                        cont++;
+                    }
+                    wr = write(file, buffer, cont); // 
+                    wr = write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
+                    
+                     
+                } else {
+                    
+                    wr = write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
+                    sprintf(buffer, "%s: [ERROR] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
+                    int cont = 0;
+                    while(buffer[cont] != '\0'){
+                        cont++;
+                    }
+                    wr = write(file, buffer, cont); // 
+                    wr = write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
+                    
+
+                    // vermelho_bold();
+                    // printf("test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
+                    // normal();
+
+
+                }
+                close(file);
+
             } 
            
         }
 
 
         // printf("id do primeiro filho a acabar: %d\n", WEXITSTATUS(w));
+        for (int i = 0; i < size; i++){
+            char arq[100];
+            sprintf(arq, "%s.txt",all_tests[i].name );
+            char buf[1];
+            int fileread = open(arq, O_RDONLY);
+            int bytes_read = read(fileread, buf, 1);
+            printf("%c", buf[0]);
+             while(bytes_read != '\0') {
+                 bytes_read = read(fileread, buf, 1);
+                 printf("%c", buf[0]);
+             }
+             close(fileread);
+             remove(arq);
+        }
 
         printf("\n\n=================================\n");
         printf("%d/%d tests passed\n", pass_count, size);
