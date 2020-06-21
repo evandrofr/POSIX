@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
         int w;
         // wait(&w);
         while ((waitpid = wait(&w)) > 0){
-            int id = waitpid - getpid();
+            int id = waitpid - getpid() - 1;
             if (WIFEXITED(w)) pass_count += WEXITSTATUS(w);
             if (WIFSIGNALED(w)){
                 char arq[100];
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
 
                 write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
-                sprintf(buffer, "test%d: [ERROR] %s\n",id,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
+                sprintf(buffer, "%s: [ERROR] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
                 int cont = 0;
                 while(buffer[cont] != '\0'){
                     cont++;
@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) {
                  printf("%c", buf[0]);
              }
              close(fileread);
+             remove(arq);
         }
 
         printf("\n\n=================================\n");
