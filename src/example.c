@@ -74,7 +74,7 @@ int test8() {
 }
 
 int test9() {
-    alarm(11);
+    alarm(2);
     test_assert(1 == 1, "Sleep Pass");
     sleep(10);
     test_assert(1 == 0, "Sleep Fail");
@@ -82,16 +82,19 @@ int test9() {
 }
 
 int test10(){
+    alarm(2);
     test_printf("Quick test pass\n");
     return 0;
 }
 
 int test11(){
+    alarm(2);
     test_assert(1 == 0, "Quick Fail");
     return 0;
 }
 
 int test12(){
+    alarm(2);
     int soma = 0;
     for(int i = 0; i < 1000; i++){
         for(int j = 0; j < 1000; j++){

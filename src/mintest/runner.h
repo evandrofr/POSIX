@@ -56,29 +56,43 @@ int main(int argc, char *argv[]) {
         // wait(&w);
         while ((waitpid = wait(&w)) > 0){
             int id = waitpid - getpid() - 1;
+            int wr;
             if (WIFEXITED(w)) pass_count += WEXITSTATUS(w);
             if (WIFSIGNALED(w)){
                 char arq[100];
                 sprintf(arq, "%s.txt",all_tests[id].name );
                 char buffer[64];
                 int file = open(arq, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
-                // dup2(file,STDOUT_FILENO);
+                if(WTERMSIG(w) == 14){
+                     wr = write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
+                    sprintf(buffer, "%s: [TIME] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
+                    int cont = 0;
+                    while(buffer[cont] != '\0'){
+                        cont++;
+                    }
+                    wr = write(file, buffer, cont); // 
+                    wr = write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
+                    
+                     
+                } else {
+                    
+                    wr = write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
+                    sprintf(buffer, "%s: [ERROR] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
+                    int cont = 0;
+                    while(buffer[cont] != '\0'){
+                        cont++;
+                    }
+                    wr = write(file, buffer, cont); // 
+                    wr = write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
+                    
+
+                    // vermelho_bold();
+                    // printf("test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
+                    // normal();
 
 
-
-                write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
-                sprintf(buffer, "%s: [ERROR] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
-                int cont = 0;
-                while(buffer[cont] != '\0'){
-                    cont++;
                 }
-                write(file, buffer, cont); // 
-                write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
                 close(file);
-
-                // vermelho_bold();
-                // printf("test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
-                // normal();
 
             } 
            
