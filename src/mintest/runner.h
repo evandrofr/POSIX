@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
         int size = sizeof(all_tests)/sizeof(test_data);
 
         printf("Running %d tests:\n", size);
-        printf("=========================================\n\n");
+        printf("================================================\n\n");
         
         for (int i = 0; i < size; i++) {
             filho = fork();
@@ -63,35 +63,30 @@ int main(int argc, char *argv[]) {
                 sprintf(arq, "%s.txt",all_tests[id].name );
                 char buffer[64];
                 int file = open(arq, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+                wr = write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
                 if(WTERMSIG(w) == 14){
-                     wr = write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
+                    
                     sprintf(buffer, "%s: [TIME] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
                     int cont = 0;
                     while(buffer[cont] != '\0'){
                         cont++;
                     }
                     wr = write(file, buffer, cont); // 
-                    wr = write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
-                    
-                     
                 } else {
-                    
-                    wr = write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
                     sprintf(buffer, "%s: [ERROR] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
                     int cont = 0;
                     while(buffer[cont] != '\0'){
                         cont++;
                     }
                     wr = write(file, buffer, cont); // 
-                    wr = write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
-                    
-
                     // vermelho_bold();
                     // printf("test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
                     // normal();
 
 
                 }
+                wr = write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
+
                 close(file);
 
             } 
@@ -115,7 +110,7 @@ int main(int argc, char *argv[]) {
              remove(arq);
         }
 
-        printf("\n\n=================================\n");
+        printf("\n\n=============================================\n");
         printf("%d/%d tests passed\n", pass_count, size);
     } else if(argc == 2) {
         pid_t f;

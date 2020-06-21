@@ -6,17 +6,17 @@
 #define VERDE "\033[0;32m"
 
 void vermelho() {
-  printf("\033[0;31m");
+  printf(VERMELHO);
 }
 
 void vermelho_bold() {
-  printf("\033[1;31m");
+  printf(VERMELHOBOLD);
 }
 
 void verde() {
-  printf("\033[0;32m");
+  printf(VERDE);
 }
 
 void normal() {
-  printf("\033[0m");
+  printf(NORMAL);
 }
