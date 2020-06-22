@@ -13,8 +13,6 @@ typedef struct {
 
 #define test_assert(expr, str) { if(!(expr)) { vermelho(); printf("%s: [FAIL] %s in %s:%d\n", __func__, str, __FILE__, __LINE__); normal(); return -1; } }
 
-//#define test_assert(expr, str) { if(!(expr)) { write(file,"\033[0;31m", sizeof("\033[0;31m")/sizeof(char) - 1); sprintf(buffer, "%s: [FAIL] %s in %s:%d\n", __func__, str, __FILE__, __LINE__); write(file, buffer, sizeof(buffer)/sizeof(char)-1); write(file, "\033[0m",sizeof("\033[0m")/sizeof(char) - 1 ); return -1; } }
-
 #define TEST(f) {.name=#f, .function=f}
 
 #define test_list test_data all_tests[]

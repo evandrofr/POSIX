@@ -22,23 +22,12 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < size; i++) {
             filho = fork();
             if(filho == 0){
-                char arq[100];
+                char arq[64];
                 sprintf(arq, "%s.txt",all_tests[i].name );
-                //char buffer[64];
-                int file = open(arq, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
-                dup2(file,STDOUT_FILENO);
+                int file = open(arq, O_WRONLY | O_CREAT, 0700);
+                dup2(file,1);
                 if (all_tests[i].function() >= 0) {
-                    ret_filho = 1;
-                    //write(file, "\033[0;32m", sizeof("\033[0;32m")/sizeof(char)); // verde
-                    // sprintf(buffer, "%s: [PASS]\n", all_tests[i].name);
-                    // int cont = 0;
-                    // while(buffer[cont] != '\0'){
-                    //     cont++;
-                    // }
-                    // write(file, buffer, cont); //
-                    // write(file, "\033[0m",sizeof("\033[0m")/sizeof(char));// Normal
-
-
+                   ret_filho = 1;
                    verde();
                    printf("%s: [PASS]\n", all_tests[i].name);
                    normal();
@@ -49,42 +38,34 @@ int main(int argc, char *argv[]) {
             
         }
 
+
         if (filho == 0) {
             return ret_filho;
         }
+
+
         int w;
-        // wait(&w);
         while ((waitpid = wait(&w)) > 0){
             int id = waitpid - getpid() - 1;
             int wr;
             if (WIFEXITED(w)) pass_count += WEXITSTATUS(w);
             if (WIFSIGNALED(w)){
-                char arq[100];
-                sprintf(arq, "%s.txt",all_tests[id].name );
+                char arq[64];
+                sprintf(arq, "%s.txt",all_tests[id].name);
                 char buffer[64];
-                int file = open(arq, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+                int file = open(arq, O_WRONLY | O_CREAT, 0700);
                 wr = write(file, "\033[1;31m", sizeof("\033[1;31m")/sizeof(char)); // vermelho_bold
                 if(WTERMSIG(w) == 14){
-                    
                     sprintf(buffer, "%s: [TIME] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
-                    int cont = 0;
-                    while(buffer[cont] != '\0'){
-                        cont++;
-                    }
-                    wr = write(file, buffer, cont); // 
                 } else {
                     sprintf(buffer, "%s: [ERROR] %s\n",all_tests[id].name,strsignal(WTERMSIG(w))); //strsignal(WTERMSIG(w))
-                    int cont = 0;
-                    while(buffer[cont] != '\0'){
-                        cont++;
-                    }
-                    wr = write(file, buffer, cont); // 
-                    // vermelho_bold();
-                    // printf("test%d: [ERROR] %s\n",id, strsignal(WTERMSIG(w)));
-                    // normal();
-
-
                 }
+                int cont = 0;
+                while(buffer[cont] != '\0'){
+                    cont++;
+                }
+                wr = write(file, buffer, cont);
+
                 wr = write(file, "\033[0m",sizeof("\033[0m")/sizeof(char)); //Normal
 
                 close(file);
@@ -94,25 +75,26 @@ int main(int argc, char *argv[]) {
         }
 
 
-        // printf("id do primeiro filho a acabar: %d\n", WEXITSTATUS(w));
         for (int i = 0; i < size; i++){
-            char arq[100];
+            char arq[64];
             sprintf(arq, "%s.txt",all_tests[i].name );
             char buf[1];
             int fileread = open(arq, O_RDONLY);
             int bytes_read = read(fileread, buf, 1);
             printf("%c", buf[0]);
-             while(bytes_read != '\0') {
-                 bytes_read = read(fileread, buf, 1);
-                 printf("%c", buf[0]);
-             }
-             close(fileread);
-             remove(arq);
+            while(bytes_read > 0) {
+                bytes_read = read(fileread, buf, 1);
+                printf("%c", buf[0]);
+            }
+            close(fileread);
+            remove(arq);
         }
 
         printf("\n\n=============================================\n");
         printf("%d/%d tests passed\n", pass_count, size);
+
     } else if(argc == 2) {
+
         pid_t f;
         printf("Rodando o teste %s\n", argv[1]);
         int size = sizeof(all_tests)/sizeof(test_data);
@@ -130,9 +112,12 @@ int main(int argc, char *argv[]) {
               
             }
         }
+
+
         if(f == 0){
             return 0;
         }
+        
         int st;
         wait(&st);
         if (WIFSIGNALED(st)){
@@ -142,6 +127,8 @@ int main(int argc, char *argv[]) {
         }
         
  
+    } else {
+        printf("Número de argumentos inadequando.\n");
     }
 
     return 0;
